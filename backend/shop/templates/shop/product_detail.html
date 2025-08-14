@@ -1,0 +1,379 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Style Ghor{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'shop:home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'shop:category_detail' product.category.slug %}">{{ product.category.name }}</a></li>
+            <li class="breadcrumb-item active">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Product Images -->
+        <div class="col-lg-6">
+            <div class="product-gallery">
+                <!-- Main Image -->
+                <div class="main-image mb-3">
+                    {% if product.images.first %}
+                        <img id="mainImage" src="{{ product.images.first.image.url }}" class="img-fluid rounded" alt="{{ product.name }}">
+                    {% else %}
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 400px;">
+                            <i class="fas fa-image fa-5x text-muted"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Thumbnail Images -->
+                {% if product.images.count > 1 %}
+                <div class="thumbnail-images d-flex gap-2">
+                    {% for image in product.images.all %}
+                    <div class="thumbnail-item">
+                        <img src="{{ image.image.url }}" class="img-thumbnail thumbnail-img" alt="{{ product.name }}" 
+                             style="width: 80px; height: 80px; object-fit: cover; cursor: pointer;"
+                             onclick="changeMainImage(this.src)">
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Product Info -->
+        <div class="col-lg-6">
+            <div class="product-info">
+                <h1 class="h2 mb-3">{{ product.name }}</h1>
+                
+                <!-- Brand -->
+                {% if product.brand %}
+                <p class="text-muted mb-2">
+                    Brand: <a href="{% url 'shop:brand_detail' product.brand.slug %}" class="text-decoration-none">{{ product.brand.name }}</a>
+                </p>
+                {% endif %}
+                
+                <!-- Rating -->
+                <div class="rating mb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="stars me-2">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= avg_rating %}
+                                    <i class="fas fa-star text-warning"></i>
+                                {% else %}
+                                    <i class="far fa-star text-muted"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <span class="text-muted">({{ reviews.count }} reviews)</span>
+                    </div>
+                </div>
+                
+                <!-- Price -->
+                <div class="price-section mb-4">
+                    {% if product.is_on_sale %}
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="h3 text-decoration-line-through text-muted">৳{{ product.price }}</span>
+                            <span class="h2 text-danger fw-bold">৳{{ product.current_price }}</span>
+                            <span class="badge bg-danger fs-6">-{{ product.discount_percentage }}% OFF</span>
+                        </div>
+                    {% else %}
+                        <span class="h2 text-primary fw-bold">৳{{ product.current_price }}</span>
+                    {% endif %}
+                </div>
+                
+                <!-- Stock Status -->
+                <div class="stock-status mb-3">
+                    {% if product.stock > 0 %}
+                        <span class="badge bg-success">In Stock ({{ product.stock }} available)</span>
+                    {% else %}
+                        <span class="badge bg-danger">Out of Stock</span>
+                    {% endif %}
+                </div>
+                
+                <!-- Product Variants -->
+                {% if product.variants.exists %}
+                <div class="variants mb-4">
+                    <h6>Select Options:</h6>
+                    {% regroup product.variants.all by name as variant_groups %}
+                    {% for group in variant_groups %}
+                    <div class="variant-group mb-3">
+                        <label class="form-label">{{ group.grouper }}:</label>
+                        <div class="d-flex gap-2 flex-wrap">
+                            {% for variant in group.list %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="variant_{{ group.grouper|lower }}" 
+                                       id="variant_{{ variant.id }}" value="{{ variant.id }}" 
+                                       {% if forloop.first %}checked{% endif %}>
+                                <label class="form-check-label" for="variant_{{ variant.id }}">
+                                    {{ variant.value }}
+                                    {% if variant.price_adjustment > 0 %}
+                                        (+৳{{ variant.price_adjustment }})
+                                    {% elif variant.price_adjustment < 0 %}
+                                        (-৳{{ variant.price_adjustment|abs }})
+                                    {% endif %}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <!-- Add to Cart -->
+                <div class="add-to-cart-section mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Quantity:</label>
+                            <input type="number" id="quantity" class="form-control" value="1" min="1" max="{{ product.stock }}">
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button class="btn btn-primary btn-lg add-to-cart-btn" {% if product.stock == 0 %}disabled{% endif %}>
+                                    <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Wishlist -->
+                <div class="wishlist-section mb-4">
+                    <form method="POST" action="{% url 'shop:add_to_wishlist' product.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-secondary">
+                            <i class="fas fa-heart me-2"></i>Add to Wishlist
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Product Details -->
+                <div class="product-details">
+                    <h6>Product Details:</h6>
+                    <ul class="list-unstyled">
+                        <li><strong>SKU:</strong> {{ product.sku }}</li>
+                        <li><strong>Condition:</strong> {{ product.get_condition_display }}</li>
+                        {% if product.weight %}
+                        <li><strong>Weight:</strong> {{ product.weight }} kg</li>
+                        {% endif %}
+                        {% if product.dimensions %}
+                        <li><strong>Dimensions:</strong> {{ product.dimensions }}</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Product Description -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="productTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab">
+                                Description
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">
+                                Reviews ({{ reviews.count }})
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="related-tab" data-bs-toggle="tab" data-bs-target="#related" type="button" role="tab">
+                                Related Products
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="productTabsContent">
+                        <!-- Description Tab -->
+                        <div class="tab-pane fade show active" id="description" role="tabpanel">
+                            <div class="product-description">
+                                {{ product.description|linebreaks }}
+                            </div>
+                        </div>
+                        
+                        <!-- Reviews Tab -->
+                        <div class="tab-pane fade" id="reviews" role="tabpanel">
+                            <div class="reviews-section">
+                                <!-- Add Review Form -->
+                                {% if user.is_authenticated %}
+                                <div class="add-review-form mb-4">
+                                    <h6>Write a Review</h6>
+                                    <form method="POST" action="{% url 'shop:add_review' product.id %}">
+                                        {% csrf_token %}
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Rating:</label>
+                                                <select name="rating" class="form-select" required>
+                                                    <option value="">Select Rating</option>
+                                                    <option value="5">5 Stars - Excellent</option>
+                                                    <option value="4">4 Stars - Very Good</option>
+                                                    <option value="3">3 Stars - Good</option>
+                                                    <option value="2">2 Stars - Fair</option>
+                                                    <option value="1">1 Star - Poor</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Title:</label>
+                                                <input type="text" name="title" class="form-control" placeholder="Review title">
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label">Comment:</label>
+                                                <textarea name="comment" class="form-control" rows="3" placeholder="Share your experience..." required></textarea>
+                                            </div>
+                                            <div class="col-12">
+                                                <button type="submit" class="btn btn-primary">Submit Review</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                {% else %}
+                                <div class="alert alert-info">
+                                    <a href="{% url 'users:login' %}">Login</a> to write a review.
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Reviews List -->
+                                <div class="reviews-list">
+                                    {% if reviews %}
+                                        {% for review in reviews %}
+                                        <div class="review-item border-bottom pb-3 mb-3">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <div class="stars mb-2">
+                                                        {% for i in "12345" %}
+                                                            {% if forloop.counter <= review.rating %}
+                                                                <i class="fas fa-star text-warning"></i>
+                                                            {% else %}
+                                                                <i class="far fa-star text-muted"></i>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% if review.title %}
+                                                    <h6 class="mb-1">{{ review.title }}</h6>
+                                                    {% endif %}
+                                                    <p class="mb-1">{{ review.comment }}</p>
+                                                    <small class="text-muted">By {{ review.user.username }} on {{ review.created_at|date:"M d, Y" }}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="text-muted">No reviews yet. Be the first to review this product!</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Related Products Tab -->
+                        <div class="tab-pane fade" id="related" role="tabpanel">
+                            <div class="related-products">
+                                <div class="row g-4">
+                                    {% for related_product in related_products %}
+                                    <div class="col-md-6 col-lg-3">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <h6 class="card-title">{{ related_product.name }}</h6>
+                                                <p class="fw-bold">৳{{ related_product.current_price }}</p>
+                                                <a href="{% url 'shop:product_detail' related_product.slug %}" class="btn btn-outline-primary btn-sm">View Details</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Change main image when thumbnail is clicked
+    window.changeMainImage = function(src) {
+        document.getElementById('mainImage').src = src;
+    };
+    
+    // Add to cart functionality
+    $('.add-to-cart-btn').click(function() {
+        const productId = {{ product.id }};
+        const quantity = $('#quantity').val();
+        const variantId = $('input[name^="variant_"]:checked').val();
+        
+        addToCart(productId, quantity, variantId);
+    });
+    
+    // Update price when variant changes
+    $('input[name^="variant_"]').change(function() {
+        // You can add logic here to update the displayed price
+        // based on selected variants
+    });
+});
+
+function addToCart(productId, quantity, variantId) {
+    const data = {
+        product_id: productId,
+        quantity: quantity
+    };
+    
+    if (variantId) {
+        data.variant_id = variantId;
+    }
+    
+    $.ajax({
+        url: '{% url "shop:add_to_cart" %}',
+        method: 'POST',
+        data: JSON.stringify(data),
+        contentType: 'application/json',
+        headers: {
+            'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+        },
+        success: function(response) {
+            if (response.status === 'success') {
+                // Update cart count
+                $('.cart-count').text(response.cart_count);
+                
+                // Show success message
+                showAlert('Product added to cart successfully!', 'success');
+            } else {
+                showAlert(response.message, 'error');
+            }
+        },
+        error: function() {
+            showAlert('Error adding product to cart', 'error');
+        }
+    });
+}
+
+function showAlert(message, type) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    $('.container').first().prepend(alertHtml);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(function() {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ brand.name }} - Style Ghor{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Brand Header -->
+    <div class="brand-header text-center mb-5">
+        <h1 class="mb-3">{{ brand.name }}</h1>
+        {% if brand.description %}
+            <p class="lead text-muted">{{ brand.description }}</p>
+        {% endif %}
+        {% if brand.logo %}
+            <img src="{{ brand.logo.url }}" alt="{{ brand.name }}" class="img-fluid rounded" style="max-height: 150px;">
+        {% endif %}
+    </div>
+    
+    <!-- Brand Stats -->
+    <div class="brand-stats mb-5">
+        <div class="row text-center">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="text-primary">{{ products.count }}</h3>
+                        <p class="text-muted mb-0">Total Products</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="text-success">{{ featured_count }}</h3>
+                        <p class="text-muted mb-0">Featured Products</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="text-warning">{{ new_arrivals_count }}</h3>
+                        <p class="text-muted mb-0">New Arrivals</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Products from Brand -->
+    <div class="products-section">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4>{{ brand.name }} Products ({{ products.count }})</h4>
+            <div class="d-flex gap-2">
+                <select class="form-select form-select-sm" id="sortSelect">
+                    <option value="newest">Newest First</option>
+                    <option value="price_low">Price: Low to High</option>
+                    <option value="price_high">Price: High to Low</option>
+                    <option value="name">Name A-Z</option>
+                    <option value="popularity">Most Popular</option>
+                </select>
+            </div>
+        </div>
+        
+        {% if products %}
+            <div class="row g-4">
+                {% for product in products %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 product-card">
+                        <div class="product-image-container position-relative">
+                            {% if product.images.first %}
+                                <img src="{{ product.images.first.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Badges -->
+                            <div class="position-absolute top-0 start-0 m-2">
+                                {% if product.is_on_sale %}
+                                    <span class="badge bg-danger">-{{ product.discount_percentage }}%</span>
+                                {% endif %}
+                                {% if product.is_featured %}
+                                    <span class="badge bg-primary">Featured</span>
+                                {% endif %}
+                                {% if product.is_new_arrival %}
+                                    <span class="badge bg-success">New</span>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Quick Actions -->
+                            <div class="product-actions position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-75 opacity-0 transition-opacity">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <button class="btn btn-sm btn-primary add-to-cart" data-product-id="{{ product.id }}">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-light add-to-wishlist" data-product-id="{{ product.id }}">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <a href="{% url 'shop:product_detail' product.slug %}" class="btn btn-sm btn-outline-light">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title">{{ product.name }}</h6>
+                            <p class="card-text text-muted small">{{ product.short_description|truncatewords:8 }}</p>
+                            
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="price-container">
+                                        {% if product.is_on_sale %}
+                                            <span class="text-decoration-line-through text-muted">৳{{ product.price }}</span>
+                                            <span class="text-danger fw-bold">৳{{ product.current_price }}</span>
+                                        {% else %}
+                                            <span class="fw-bold">৳{{ product.current_price }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="rating">
+                                        <i class="fas fa-star text-warning"></i>
+                                        <small class="text-muted">4.5</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}">
+                                        Add to Cart
+                                    </button>
+                                    <a href="{% url 'shop:product_detail' product.slug %}" class="btn btn-outline-secondary">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if products.has_other_pages %}
+            <nav aria-label="Brand pagination" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if products.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in products.paginator.page_range %}
+                        {% if products.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > products.number|add:'-3' and num < products.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if products.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.next_page_number }}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.paginator.num_pages }}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-box fa-5x text-muted mb-4"></i>
+                <h5>No products found from this brand</h5>
+                <p class="text-muted">Check back later for new products or browse other brands.</p>
+                <a href="{% url 'shop:product_list' %}" class="btn btn-primary">Browse All Products</a>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Related Brands -->
+    {% if related_brands %}
+    <div class="related-brands mt-5">
+        <h4 class="mb-4">Other Brands You Might Like</h4>
+        <div class="row g-3">
+            {% for related_brand in related_brands %}
+            <div class="col-md-3 col-sm-6">
+                <a href="{% url 'shop:brand_detail' related_brand.slug %}" class="text-decoration-none">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            {% if related_brand.logo %}
+                                <img src="{{ related_brand.logo.url }}" alt="{{ related_brand.name }}" class="img-fluid mb-2" style="height: 80px; object-fit: contain;">
+                            {% else %}
+                                <div class="bg-light rounded mb-2 d-flex align-items-center justify-content-center" style="height: 80px;">
+                                    <i class="fas fa-tag fa-2x text-muted"></i>
+                                </div>
+                            {% endif %}
+                            <h6 class="card-title text-dark">{{ related_brand.name }}</h6>
+                            <small class="text-muted">{{ related_brand.products.count }} products</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Show product actions on hover
+    $('.product-card').hover(
+        function() {
+            $(this).find('.product-actions').removeClass('opacity-0');
+        },
+        function() {
+            $(this).find('.product-actions').addClass('opacity-0');
+        }
+    );
+    
+    // Add to cart functionality
+    $('.add-to-cart').click(function() {
+        const productId = $(this).data('product-id');
+        addToCart(productId);
+    });
+    
+    // Add to wishlist functionality
+    $('.add-to-wishlist').click(function() {
+        const productId = $(this).data('product-id');
+        addToWishlist(productId);
+    });
+    
+    // Sort functionality
+    $('#sortSelect').change(function() {
+        const sortBy = $(this).val();
+        const currentUrl = new URL(window.location);
+        currentUrl.searchParams.set('sort', sortBy);
+        window.location.href = currentUrl.toString();
+    });
+    
+    // Set current sort value
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentSort = urlParams.get('sort');
+    if (currentSort) {
+        $('#sortSelect').val(currentSort);
+    }
+});
+</script>
+{% endblock %}

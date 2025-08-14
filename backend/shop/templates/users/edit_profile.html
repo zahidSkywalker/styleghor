@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - Style Ghor{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Edit Profile</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Profile Picture -->
+                        <div class="text-center mb-4">
+                            {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 120px; height: 120px;">
+                                    <i class="fas fa-user fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <input type="file" name="profile_picture" class="form-control" accept="image/*">
+                                <small class="text-muted">Upload a new profile picture (optional)</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Personal Information -->
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="id_username" class="form-label">Username</label>
+                                <input type="text" name="username" class="form-control" id="id_username" value="{{ user.username }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_email" class="form-label">Email</label>
+                                <input type="email" name="email" class="form-control" id="id_email" value="{{ user.email }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_full_name" class="form-label">Full Name</label>
+                                <input type="text" name="full_name" class="form-control" id="id_full_name" value="{{ user.full_name|default:'' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_phone_number" class="form-label">Phone Number</label>
+                                <input type="tel" name="phone_number" class="form-control" id="id_phone_number" value="{{ user.phone_number|default:'' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_date_of_birth" class="form-label">Date of Birth</label>
+                                <input type="date" name="date_of_birth" class="form-control" id="id_date_of_birth" value="{{ user.date_of_birth|date:'Y-m-d'|default:'' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_gender" class="form-label">Gender</label>
+                                <select name="gender" class="form-select" id="id_gender">
+                                    <option value="">Select Gender</option>
+                                    <option value="male" {% if user.gender == 'male' %}selected{% endif %}>Male</option>
+                                    <option value="female" {% if user.gender == 'female' %}selected{% endif %}>Female</option>
+                                    <option value="other" {% if user.gender == 'other' %}selected{% endif %}>Other</option>
+                                    <option value="prefer_not_to_say" {% if user.gender == 'prefer_not_to_say' %}selected{% endif %}>Prefer not to say</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Address Information -->
+                        <hr class="my-4">
+                        <h6 class="mb-3">Address Information</h6>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="id_address_line_1" class="form-label">Address Line 1</label>
+                                <input type="text" name="address_line_1" class="form-control" id="id_address_line_1" value="{{ user.address_line_1|default:'' }}">
+                            </div>
+                            <div class="col-12">
+                                <label for="id_address_line_2" class="form-label">Address Line 2 (Optional)</label>
+                                <input type="text" name="address_line_2" class="form-control" id="id_address_line_2" value="{{ user.address_line_2|default:'' }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="id_city" class="form-label">City</label>
+                                <input type="text" name="city" class="form-control" id="id_city" value="{{ user.city|default:'' }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="id_state" class="form-label">State/Province</label>
+                                <input type="text" name="state" class="form-control" id="id_state" value="{{ user.state|default:'' }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="id_zip_code" class="form-label">ZIP/Postal Code</label>
+                                <input type="text" name="zip_code" class="form-control" id="id_zip_code" value="{{ user.zip_code|default:'' }}">
+                            </div>
+                            <div class="col-12">
+                                <label for="id_country" class="form-label">Country</label>
+                                <select name="country" class="form-select" id="id_country">
+                                    <option value="">Select Country</option>
+                                    <option value="Bangladesh" {% if user.country == 'Bangladesh' %}selected{% endif %}>Bangladesh</option>
+                                    <option value="India" {% if user.country == 'India' %}selected{% endif %}>India</option>
+                                    <option value="Pakistan" {% if user.country == 'Pakistan' %}selected{% endif %}>Pakistan</option>
+                                    <option value="Sri Lanka" {% if user.country == 'Sri Lanka' %}selected{% endif %}>Sri Lanka</option>
+                                    <option value="Nepal" {% if user.country == 'Nepal' %}selected{% endif %}>Nepal</option>
+                                    <option value="Other" {% if user.country == 'Other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Preferences -->
+                        <hr class="my-4">
+                        <h6 class="mb-3">Preferences</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="newsletter_subscription" id="id_newsletter_subscription" 
+                                           {% if user.newsletter_subscription %}checked{% endif %}>
+                                    <label class="form-check-label" for="id_newsletter_subscription">
+                                        Subscribe to newsletter
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="marketing_emails" id="id_marketing_emails" 
+                                           {% if user.marketing_emails %}checked{% endif %}>
+                                    <label class="form-check-label" for="id_marketing_emails">
+                                        Receive marketing emails
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="sms_notifications" id="id_sms_notifications" 
+                                           {% if user.sms_notifications %}checked{% endif %}>
+                                    <label class="form-check-label" for="id_sms_notifications">
+                                        SMS notifications
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="order_updates" id="id_order_updates" 
+                                           {% if user.order_updates %}checked{% endif %}>
+                                    <label class="form-check-label" for="id_order_updates">
+                                        Order status updates
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Buttons -->
+                        <div class="d-flex gap-3 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                            <a href="{% url 'users:profile' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Account Actions -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Account Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'users:change_password' %}" class="btn btn-outline-warning">
+                            <i class="fas fa-key me-2"></i>Change Password
+                        </a>
+                        <a href="{% url 'users:account_settings' %}" class="btn btn-outline-info">
+                            <i class="fas fa-cog me-2"></i>Account Settings
+                        </a>
+                        <button class="btn btn-outline-danger" onclick="confirmDeleteAccount()">
+                            <i class="fas fa-trash me-2"></i>Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Form validation
+    $('form').submit(function(e) {
+        if (!validateForm()) {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
+    // File input preview
+    $('input[name="profile_picture"]').change(function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('.rounded-circle').attr('src', e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+});
+
+function validateForm() {
+    let isValid = true;
+    
+    // Check required fields
+    const requiredFields = ['username', 'email'];
+    requiredFields.forEach(field => {
+        const value = $(`#id_${field}`).val().trim();
+        if (!value) {
+            showAlert(`Please fill in the ${field.replace('_', ' ')} field`, 'error');
+            isValid = false;
+        }
+    });
+    
+    // Validate email format
+    const email = $('#id_email').val().trim();
+    if (email && !isValidEmail(email)) {
+        showAlert('Please enter a valid email address', 'error');
+        isValid = false;
+    }
+    
+    // Validate phone number
+    const phone = $('#id_phone_number').val().trim();
+    if (phone && !isValidPhone(phone)) {
+        showAlert('Please enter a valid phone number', 'error');
+        isValid = false;
+    }
+    
+    return isValid;
+}
+
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+function isValidPhone(phone) {
+    const phoneRegex = /^\+?[\d\s\-\(\)]{10,}$/;
+    return phoneRegex.test(phone);
+}
+
+function confirmDeleteAccount() {
+    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+        window.location.href = '{% url "users:delete_account" %}';
+    }
+}
+
+function showAlert(message, type) {
+    const alertClass = type === 'success' ? 'alert-success' : 
+                      type === 'error' ? 'alert-danger' : 
+                      type === 'warning' ? 'alert-warning' : 'alert-info';
+    
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // Remove existing alerts
+    $('.alert').remove();
+    
+    // Add new alert
+    $('.card-body').first().prepend(alertHtml);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        $('.alert').fadeOut(300, function() {
+            $(this).remove();
+        });
+    }, 5000);
+}
+</script>
+{% endblock %}

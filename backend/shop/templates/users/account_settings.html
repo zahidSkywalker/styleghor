@@ -1,0 +1,382 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Account Settings - Style Ghor{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-cog me-2"></i>Account Settings
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="accountSettingsForm">
+                        {% csrf_token %}
+                        
+                        <!-- Notification Preferences -->
+                        <div class="settings-section mb-4">
+                            <h6 class="mb-3">Notification Preferences</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="email_notifications" id="id_email_notifications" 
+                                               {% if user.email_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_email_notifications">
+                                            Email Notifications
+                                        </label>
+                                        <small class="form-text text-muted d-block">Receive order updates and promotions via email</small>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="sms_notifications" id="id_sms_notifications" 
+                                               {% if user.sms_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_sms_notifications">
+                                            SMS Notifications
+                                        </label>
+                                        <small class="form-text text-muted d-block">Receive order updates via SMS</small>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="push_notifications" id="id_push_notifications" 
+                                               {% if user.push_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_push_notifications">
+                                            Push Notifications
+                                        </label>
+                                        <small class="form-text text-muted d-block">Receive notifications on your device</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="order_updates" id="id_order_updates" 
+                                               {% if user.order_updates %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_order_updates">
+                                            Order Updates
+                                        </label>
+                                        <small class="form-text text-muted d-block">Get notified about order status changes</small>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="delivery_notifications" id="id_delivery_notifications" 
+                                               {% if user.delivery_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_delivery_notifications">
+                                            Delivery Notifications
+                                        </label>
+                                        <small class="form-text text-muted d-block">Get notified when your order is delivered</small>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="return_notifications" id="id_return_notifications" 
+                                               {% if user.return_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_return_notifications">
+                                            Return Notifications
+                                        </label>
+                                        <small class="form-text text-muted d-block">Get notified about return status</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Marketing Preferences -->
+                        <div class="settings-section mb-4">
+                            <h6 class="mb-3">Marketing Preferences</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="newsletter_subscription" id="id_newsletter_subscription" 
+                                               {% if user.newsletter_subscription %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_newsletter_subscription">
+                                            Newsletter Subscription
+                                        </label>
+                                        <small class="form-text text-muted d-block">Receive our monthly newsletter with fashion tips</small>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="marketing_emails" id="id_marketing_emails" 
+                                               {% if user.marketing_emails %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_marketing_emails">
+                                            Marketing Emails
+                                        </label>
+                                        <small class="form-text text-muted d-block">Receive promotional emails and offers</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="birthday_offers" id="id_birthday_offers" 
+                                               {% if user.birthday_offers %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_birthday_offers">
+                                            Birthday Offers
+                                        </label>
+                                        <small class="form-text text-muted d-block">Receive special offers on your birthday</small>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="new_product_alerts" id="id_new_product_alerts" 
+                                               {% if user.new_product_alerts %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_new_product_alerts">
+                                            New Product Alerts
+                                        </label>
+                                        <small class="form-text text-muted d-block">Get notified about new arrivals</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Privacy Settings -->
+                        <div class="settings-section mb-4">
+                            <h6 class="mb-3">Privacy Settings</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="profile_visibility" id="id_profile_visibility" 
+                                               {% if user.profile_visibility %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_profile_visibility">
+                                            Public Profile
+                                        </label>
+                                        <small class="form-text text-muted d-block">Allow others to see your public profile</small>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="show_reviews" id="id_show_reviews" 
+                                               {% if user.show_reviews %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_show_reviews">
+                                            Show Reviews
+                                        </label>
+                                        <small class="form-text text-muted d-block">Display your reviews publicly</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="data_sharing" id="id_data_sharing" 
+                                               {% if user.data_sharing %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_data_sharing">
+                                            Data Sharing
+                                        </label>
+                                        <small class="form-text text-muted d-block">Allow data sharing for better service</small>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="analytics_tracking" id="id_analytics_tracking" 
+                                               {% if user.analytics_tracking %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_analytics_tracking">
+                                            Analytics Tracking
+                                        </label>
+                                        <small class="form-text text-muted d-block">Help us improve with analytics data</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Language and Region -->
+                        <div class="settings-section mb-4">
+                            <h6 class="mb-3">Language and Region</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="id_language" class="form-label">Language</label>
+                                    <select name="language" class="form-select" id="id_language">
+                                        <option value="en" {% if user.language == 'en' %}selected{% endif %}>English</option>
+                                        <option value="bn" {% if user.language == 'bn' %}selected{% endif %}>বাংলা (Bengali)</option>
+                                        <option value="hi" {% if user.language == 'hi' %}selected{% endif %}>हिन्दी (Hindi)</option>
+                                        <option value="ur" {% if user.language == 'ur' %}selected{% endif %}>اردو (Urdu)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="id_timezone" class="form-label">Timezone</label>
+                                    <select name="timezone" class="form-select" id="id_timezone">
+                                        <option value="Asia/Dhaka" {% if user.timezone == 'Asia/Dhaka' %}selected{% endif %}>Asia/Dhaka (GMT+6)</option>
+                                        <option value="Asia/Kolkata" {% if user.timezone == 'Asia/Kolkata' %}selected{% endif %}>Asia/Kolkata (GMT+5:30)</option>
+                                        <option value="Asia/Karachi" {% if user.timezone == 'Asia/Karachi' %}selected{% endif %}>Asia/Karachi (GMT+5)</option>
+                                        <option value="Asia/Colombo" {% if user.timezone == 'Asia/Colombo' %}selected{% endif %}>Asia/Colombo (GMT+5:30)</option>
+                                        <option value="Asia/Kathmandu" {% if user.timezone == 'Asia/Kathmandu' %}selected{% endif %}>Asia/Kathmandu (GMT+5:45)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Security Settings -->
+                        <div class="settings-section mb-4">
+                            <h6 class="mb-3">Security Settings</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="two_factor_auth" id="id_two_factor_auth" 
+                                               {% if user.two_factor_auth %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_two_factor_auth">
+                                            Two-Factor Authentication
+                                        </label>
+                                        <small class="form-text text-muted d-block">Add an extra layer of security to your account</small>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="login_notifications" id="id_login_notifications" 
+                                               {% if user.login_notifications %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_login_notifications">
+                                            Login Notifications
+                                        </label>
+                                        <small class="form-text text-muted d-block">Get notified of new login attempts</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="session_timeout" id="id_session_timeout" 
+                                               {% if user.session_timeout %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_session_timeout">
+                                            Auto Logout
+                                        </label>
+                                        <small class="form-text text-muted d-block">Automatically log out after inactivity</small>
+                                    </div>
+                                    
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" name="secure_connection" id="id_secure_connection" 
+                                               {% if user.secure_connection %}checked{% endif %}>
+                                        <label class="form-check-label" for="id_secure_connection">
+                                            Secure Connection Only
+                                        </label>
+                                        <small class="form-text text-muted d-block">Only allow secure HTTPS connections</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Buttons -->
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Settings
+                            </button>
+                            <a href="{% url 'users:profile' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="button" class="btn btn-outline-warning" onclick="resetToDefaults()">
+                                <i class="fas fa-undo me-2"></i>Reset to Defaults
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Data Export/Import -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-download me-2"></i>Data Management
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Export Your Data</h6>
+                            <p class="text-muted small">Download a copy of your personal data</p>
+                            <button class="btn btn-outline-primary btn-sm" onclick="exportData()">
+                                <i class="fas fa-download me-2"></i>Export Data
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Delete Account</h6>
+                            <p class="text-muted small">Permanently delete your account and all data</p>
+                            <button class="btn btn-outline-danger btn-sm" onclick="confirmDeleteAccount()">
+                                <i class="fas fa-trash me-2"></i>Delete Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Form submission
+    $('#accountSettingsForm').submit(function(e) {
+        e.preventDefault();
+        saveSettings();
+    });
+});
+
+function saveSettings() {
+    const formData = new FormData($('#accountSettingsForm')[0]);
+    
+    // Disable submit button
+    const submitBtn = $('button[type="submit"]');
+    const originalText = submitBtn.html();
+    submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Saving...');
+    
+    $.ajax({
+        url: '{% url "users:account_settings" %}',
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.status === 'success') {
+                showAlert('Settings saved successfully!', 'success');
+            } else {
+                showAlert(response.message || 'Error saving settings', 'error');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error saving settings:', error);
+            showAlert('Error saving settings. Please try again.', 'error');
+        },
+        complete: function() {
+            // Re-enable submit button
+            submitBtn.prop('disabled', false).html(originalText);
+        }
+    });
+}
+
+function resetToDefaults() {
+    if (confirm('Are you sure you want to reset all settings to default values?')) {
+        // Reset all checkboxes to unchecked
+        $('input[type="checkbox"]').prop('checked', false);
+        
+        // Reset language and timezone to defaults
+        $('#id_language').val('en');
+        $('#id_timezone').val('Asia/Dhaka');
+        
+        showAlert('Settings reset to defaults. Click Save to apply changes.', 'info');
+    }
+}
+
+function exportData() {
+    showAlert('Data export feature will be implemented soon.', 'info');
+}
+
+function confirmDeleteAccount() {
+    if (confirm('Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently lost.')) {
+        window.location.href = '{% url "users:delete_account" %}';
+    }
+}
+
+function showAlert(message, type) {
+    const alertClass = type === 'success' ? 'alert-success' : 
+                      type === 'error' ? 'alert-danger' : 
+                      type === 'warning' ? 'alert-warning' : 'alert-info';
+    
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // Remove existing alerts
+    $('.alert').remove();
+    
+    // Add new alert
+    $('.card-body').first().prepend(alertHtml);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        $('.alert').fadeOut(300, function() {
+            $(this).remove();
+        });
+    }, 5000);
+}
+</script>
+{% endblock %}
