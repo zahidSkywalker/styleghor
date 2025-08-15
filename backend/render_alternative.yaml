@@ -3,7 +3,10 @@ services:
     name: styleghor-backend
     env: python
     plan: free
-    buildCommand: "chmod +x build.sh && ./build.sh"
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --no-input
+      python manage.py migrate
     startCommand: "gunicorn styleghor.wsgi:application"
     envVars:
       - key: PYTHON_VERSION
@@ -23,11 +26,11 @@ services:
           name: styleghor-db
           property: connectionString
       - key: SSL_COMMERZ_STORE_ID
-        value: "your_live_store_id"
+        value: "your_test_store_id"
       - key: SSL_COMMERZ_STORE_PASSWORD
-        value: "your_live_store_password"
+        value: "your_test_store_password"
       - key: SSL_COMMERZ_SANDBOX
-        value: "False"
+        value: "True"
 
 databases:
   - name: styleghor-db
