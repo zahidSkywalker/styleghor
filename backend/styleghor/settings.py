@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import dj_database_url
 
 # ----------------------------
 # Base Directory
@@ -9,8 +10,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ----------------------------
 # SECURITY
 # ----------------------------
-import os
-from pathlib import Path
 
 # SECRET_KEY will be set via environment variable in production
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key')
@@ -41,8 +40,6 @@ INSTALLED_APPS = [
 # Authentication
 # ----------------------------
 AUTH_USER_MODEL = 'users.CustomUser'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
 
 # ----------------------------
 # Middleware
@@ -50,7 +47,6 @@ LOGOUT_REDIRECT_URL = '/'
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # MUST be first
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add after SecurityMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -64,6 +60,7 @@ MIDDLEWARE = [
 # ----------------------------
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Frontend dev
+    "https://*.onrender.com",  # Render domains
 ]
 
 # ----------------------------
@@ -76,15 +73,14 @@ WSGI_APPLICATION = 'styleghor.wsgi.application'
 # ----------------------------
 # Database
 # ----------------------------
-import dj_database_url
 
-# Check if DATABASE_URL is set (production)
-if os.environ.get('DATABASE_URL'):
+# Database configuration
+try:
     DATABASES = {
-        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+        'default': dj_database_url.parse(os.environ.get('DATABASE_URL', 'sqlite:///db.sqlite3'))
     }
-else:
-    # Development database (SQLite)
+except Exception as e:
+    print(f"Database configuration error: {e}")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -124,9 +120,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Add whitenoise for static file serving in production
-if not DEBUG:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
