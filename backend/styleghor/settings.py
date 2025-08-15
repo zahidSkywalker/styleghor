@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import dj_database_url
 
 # ----------------------------
 # Base Directory
@@ -9,9 +10,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ----------------------------
 # SECURITY
 # ----------------------------
-SECRET_KEY = 'django-insecure-your-secret-key'  # Change in production
-DEBUG = True
-ALLOWED_HOSTS = ['*']  # Update with your domain in production
+
+# SECRET_KEY will be set via environment variable in production
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key')
+
+# DEBUG will be set via environment variable in production
+DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
+
+# ALLOWED_HOSTS will be set via environment variable in production
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # ----------------------------
 # Installed Apps
@@ -33,8 +40,6 @@ INSTALLED_APPS = [
 # Authentication
 # ----------------------------
 AUTH_USER_MODEL = 'users.CustomUser'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
 
 # ----------------------------
 # Middleware
@@ -55,6 +60,7 @@ MIDDLEWARE = [
 # ----------------------------
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Frontend dev
+    "https://*.onrender.com",  # Render domains
 ]
 
 # ----------------------------
@@ -67,12 +73,20 @@ WSGI_APPLICATION = 'styleghor.wsgi.application'
 # ----------------------------
 # Database
 # ----------------------------
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',  # Change to PostgreSQL in production
-        'NAME': BASE_DIR / 'db.sqlite3',
+
+# Database configuration
+try:
+    DATABASES = {
+        'default': dj_database_url.parse(os.environ.get('DATABASE_URL', 'sqlite:///db.sqlite3'))
     }
-}
+except Exception as e:
+    print(f"Database configuration error: {e}")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # ----------------------------
 # Password Validation
@@ -105,6 +119,8 @@ USE_TZ = True
 # ----------------------------
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
