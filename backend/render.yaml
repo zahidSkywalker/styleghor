@@ -3,6 +3,7 @@ services:
     name: styleghor-backend
     env: python
     plan: free
+    rootDir: backend
     buildCommand: "chmod +x build.sh && ./build.sh"
     startCommand: "gunicorn styleghor.wsgi:application"
     envVars:

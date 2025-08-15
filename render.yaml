@@ -3,12 +3,12 @@ services:
     name: styleghor-backend
     env: python
     plan: free
-    rootDir: backend
     buildCommand: |
       pip install -r requirements.txt
+      cd backend
       python manage.py collectstatic --no-input
       python manage.py migrate
-    startCommand: "gunicorn styleghor.wsgi:application"
+    startCommand: "cd backend && gunicorn styleghor.wsgi:application"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
