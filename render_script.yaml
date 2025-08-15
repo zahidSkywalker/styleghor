@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: styleghor-backend
+    env: python
+    plan: free
+    buildCommand: "chmod +x build_render.sh && ./build_render.sh"
+    startCommand: "gunicorn backend.styleghor.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DJANGO_SETTINGS_MODULE
+        value: backend.styleghor.settings
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: SSL_COMMERZ_STORE_ID
+        value: "your_test_store_id"
+      - key: SSL_COMMERZ_STORE_PASSWORD
+        value: "your_test_store_password"
+      - key: SSL_COMMERZ_SANDBOX
+        value: "True"
+
+databases:
+  - name: styleghor-db
+    databaseName: styleghor
+    user: styleghor_user
+    plan: free
