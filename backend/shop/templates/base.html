@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Style Ghor - Your Fashion Destination{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'shop:home' %}">
+                <i class="fas fa-tshirt me-2"></i>Style Ghor
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'shop:home' %}">Home</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Categories
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for category in categories %}
+                            <li><a class="dropdown-item" href="{% url 'shop:category_detail' category.slug %}">{{ category.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'shop:product_list' %}">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'shop:product_list' %}?is_featured=1">Featured</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'shop:product_list' %}?is_new_arrival=1">New Arrivals</a>
+                    </li>
+                </ul>
+                
+                <!-- Search Form -->
+                <form class="d-flex me-3" method="GET" action="{% url 'shop:product_list' %}">
+                    <input class="form-control me-2" type="search" name="search" placeholder="Search products..." value="{{ request.GET.search }}">
+                    <button class="btn btn-outline-light" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+                
+                <!-- User Menu -->
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-1"></i>{{ user.display_name }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'users:profile' %}">Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'shop:order_history' %}">My Orders</a></li>
+                                <li><a class="dropdown-item" href="{% url 'shop:wishlist' %}">Wishlist</a></li>
+                                <li><a class="dropdown-item" href="{% url 'users:address_list' %}">Addresses</a></li>
+                                <li><a class="dropdown-item" href="{% url 'users:account_settings' %}">Settings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'users:logout' %}">Logout</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'users:login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'users:register' %}">Register</a>
+                        </li>
+                    {% endif %}
+                    
+                    <!-- Cart -->
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{% url 'shop:cart' %}">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-count">
+                                {% if user.is_authenticated %}
+                                    {% with cart=user.carts.filter.is_active=True.first %}
+                                        {{ cart.total_items|default:0 }}
+                                    {% endwith %}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="min-vh-100">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5><i class="fas fa-tshirt me-2"></i>Style Ghor</h5>
+                    <p class="text-muted">Your ultimate fashion destination. Discover the latest trends and styles.</p>
+                    <div class="social-links">
+                        <a href="#" class="text-light me-3"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-light me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-light me-3"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-light"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <h6>Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'shop:home' %}" class="text-muted">Home</a></li>
+                        <li><a href="{% url 'shop:product_list' %}" class="text-muted">Products</a></li>
+                        <li><a href="#" class="text-muted">About Us</a></li>
+                        <li><a href="#" class="text-muted">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2">
+                    <h6>Customer Service</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-muted">Help Center</a></li>
+                        <li><a href="#" class="text-muted">Returns</a></li>
+                        <li><a href="#" class="text-muted">Shipping Info</a></li>
+                        <li><a href="#" class="text-muted">Size Guide</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6>Newsletter</h6>
+                    <p class="text-muted">Subscribe for updates and exclusive offers!</p>
+                    <form method="POST" action="{% url 'shop:newsletter_subscribe' %}" class="d-flex">
+                        {% csrf_token %}
+                        <input type="email" name="email" class="form-control me-2" placeholder="Your email" required>
+                        <button type="submit" class="btn btn-outline-light">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; 2024 Style Ghor. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <img src="{% static 'images/payment-methods.png' %}" alt="Payment Methods" height="30">
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

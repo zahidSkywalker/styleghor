@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Newsletter Subscription - Style Ghor{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card text-center">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-envelope fa-3x mb-3"></i>
+                    <h3 class="mb-0">Subscribe to Our Newsletter</h3>
+                </div>
+                <div class="card-body">
+                    <p class="lead mb-4">Stay updated with the latest fashion trends, exclusive offers, and new arrivals!</p>
+                    
+                    <form method="POST" id="newsletterForm">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <div class="input-group input-group-lg">
+                                <input type="email" name="email" class="form-control" placeholder="Enter your email address" required>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div class="newsletter-benefits">
+                        <h6 class="mb-3">What you'll get:</h6>
+                        <div class="row text-start">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i>Latest fashion trends</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Exclusive discounts</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>New product alerts</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i>Style tips & advice</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Early access to sales</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Birthday specials</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <small class="text-muted">
+                            <i class="fas fa-shield-alt me-1"></i>
+                            We respect your privacy. Unsubscribe at any time.
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Newsletter Stats -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="h4 text-primary mb-1">{{ subscriber_count|default:"0" }}</div>
+                            <small class="text-muted">Subscribers</small>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="h4 text-success mb-1">{{ newsletter_count|default:"0" }}</div>
+                            <small class="text-muted">Newsletters Sent</small>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="h4 text-warning mb-1">{{ open_rate|default:"0" }}%</div>
+                            <small class="text-muted">Open Rate</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    $('#newsletterForm').submit(function(e) {
+        e.preventDefault();
+        
+        const email = $('input[name="email"]').val().trim();
+        if (!email) {
+            showAlert('Please enter your email address', 'warning');
+            return;
+        }
+        
+        // Disable submit button
+        const submitBtn = $(this).find('button[type="submit"]');
+        const originalText = submitBtn.html();
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Subscribing...');
+        
+        $.ajax({
+            url: '{% url "shop:newsletter_subscribe" %}',
+            method: 'POST',
+            data: { email: email },
+            success: function(response) {
+                if (response.status === 'success') {
+                    showAlert('Successfully subscribed to newsletter!', 'success');
+                    $('input[name="email"]').val('');
+                    
+                    // Update subscriber count
+                    if (response.subscriber_count) {
+                        $('.h4.text-primary').text(response.subscriber_count);
+                    }
+                } else {
+                    showAlert(response.message, 'error');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Newsletter subscription error:', error);
+                showAlert('Error subscribing to newsletter. Please try again.', 'error');
+            },
+            complete: function() {
+                // Re-enable submit button
+                submitBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+});
+
+function showAlert(message, type) {
+    const alertClass = type === 'success' ? 'alert-success' : 
+                      type === 'error' ? 'alert-danger' : 
+                      type === 'warning' ? 'alert-warning' : 'alert-info';
+    
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // Remove existing alerts
+    $('.alert').remove();
+    
+    // Add new alert
+    $('.card-body').first().prepend(alertHtml);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        $('.alert').fadeOut(300, function() {
+            $(this).remove();
+        });
+    }, 5000);
+}
+</script>
+{% endblock %}

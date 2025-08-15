@@ -14,6 +14,13 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']  # Update with your domain in production
 
 # ----------------------------
+# Site Configuration
+# ----------------------------
+SITE_URL = 'http://localhost:8000'  # Update with your domain in production
+SITE_NAME = 'Style Ghor'
+SITE_DESCRIPTION = 'Your Fashion Destination'
+
+# ----------------------------
 # Installed Apps
 # ----------------------------
 INSTALLED_APPS = [
@@ -35,6 +42,26 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = 'users.CustomUser'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = '/users/login/'
+
+# ----------------------------
+# Templates
+# ----------------------------
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
 
 # ----------------------------
 # Middleware
@@ -55,6 +82,7 @@ MIDDLEWARE = [
 # ----------------------------
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Frontend dev
+    "http://localhost:8000",  # Django dev
 ]
 
 # ----------------------------
@@ -109,6 +137,11 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Additional static files directories
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
 # ----------------------------
 # Default primary key field type
 # ----------------------------
@@ -129,3 +162,40 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ],
 }
+
+# ----------------------------
+# Email Configuration
+# ----------------------------
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Change in production
+DEFAULT_FROM_EMAIL = 'noreply@styleghor.com'
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your-email@example.com'
+EMAIL_HOST_PASSWORD = 'your-email-password'
+
+# ----------------------------
+# Session Configuration
+# ----------------------------
+SESSION_COOKIE_AGE = 1209600  # 2 weeks
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_SAVE_EVERY_REQUEST = True
+
+# ----------------------------
+# Message Framework
+# ----------------------------
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+
+# ----------------------------
+# Security Settings (for production)
+# ----------------------------
+if not DEBUG:
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    X_FRAME_OPTIONS = 'DENY'

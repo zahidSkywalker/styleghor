@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Account - Style Ghor{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white text-center">
+                    <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                    <h3 class="mb-0">Delete Account</h3>
+                </div>
+                <div class="card-body text-center">
+                    <div class="alert alert-warning">
+                        <h5 class="alert-heading">Warning!</h5>
+                        <p class="mb-0">This action cannot be undone. All your data will be permanently deleted.</p>
+                    </div>
+                    
+                    <h5 class="mb-3">What will be deleted:</h5>
+                    <ul class="list-unstyled text-start mb-4">
+                        <li><i class="fas fa-times text-danger me-2"></i>Your profile and personal information</li>
+                        <li><i class="fas fa-times text-danger me-2"></i>All order history and data</li>
+                        <li><i class="fas fa-times text-danger me-2"></i>Wishlist items</li>
+                        <li><i class="fas fa-times text-danger me-2"></i>Product reviews and ratings</li>
+                        <li><i class="fas fa-times text-danger me-2"></i>Addresses and preferences</li>
+                        <li><i class="fas fa-times text-danger me-2"></i>Account settings and preferences</li>
+                    </ul>
+                    
+                    <form method="POST" id="deleteAccountForm">
+                        {% csrf_token %}
+                        
+                        <!-- Confirmation Fields -->
+                        <div class="mb-4">
+                            <div class="mb-3">
+                                <label for="id_confirm_username" class="form-label">Type your username to confirm:</label>
+                                <input type="text" name="confirm_username" class="form-control" id="id_confirm_username" 
+                                       placeholder="Enter your username" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_confirm_password" class="form-label">Enter your password:</label>
+                                <input type="password" name="confirm_password" class="form-control" id="id_confirm_password" 
+                                       placeholder="Enter your password" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_reason" class="form-label">Reason for deletion (optional):</label>
+                                <select name="reason" class="form-select" id="id_reason">
+                                    <option value="">Select a reason...</option>
+                                    <option value="privacy_concerns">Privacy concerns</option>
+                                    <option value="no_longer_using">No longer using the service</option>
+                                    <option value="created_new_account">Created a new account</option>
+                                    <option value="unsatisfactory_service">Unsatisfactory service</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3" id="otherReasonDiv" style="display: none;">
+                                <label for="id_other_reason" class="form-label">Please specify:</label>
+                                <textarea name="other_reason" class="form-control" id="id_other_reason" rows="3" 
+                                          placeholder="Please tell us more about your reason..."></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="confirm_deletion" id="id_confirm_deletion" required>
+                                    <label class="form-check-label" for="id_confirm_deletion">
+                                        I understand that this action is permanent and cannot be undone
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="export_data" id="id_export_data">
+                                    <label class="form-check-label" for="id_export_data">
+                                        Export my data before deletion (recommended)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Buttons -->
+                        <div class="d-flex gap-3 justify-content-center">
+                            <button type="submit" class="btn btn-danger btn-lg" id="deleteBtn">
+                                <i class="fas fa-trash me-2"></i>Delete My Account
+                            </button>
+                            <a href="{% url 'users:account_settings' %}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Alternative Actions -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Before you go...</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">Consider these alternatives instead of deleting your account:</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-grid">
+                                <a href="{% url 'users:edit_profile' %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-edit me-2"></i>Update Profile
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-grid">
+                                <a href="{% url 'users:account_settings' %}" class="btn btn-outline-info">
+                                    <i class="fas fa-cog me-2"></i>Adjust Settings
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-grid">
+                                <a href="{% url 'users:change_password' %}" class="btn btn-outline-warning">
+                                    <i class="fas fa-key me-2"></i>Change Password
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-grid">
+                                <a href="#" class="btn btn-outline-success" onclick="contactSupport()">
+                                    <i class="fas fa-headset me-2"></i>Contact Support
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Show/hide other reason field
+    $('#id_reason').change(function() {
+        if ($(this).val() === 'other') {
+            $('#otherReasonDiv').show();
+            $('#id_other_reason').prop('required', true);
+        } else {
+            $('#otherReasonDiv').hide();
+            $('#id_other_reason').prop('required', false);
+        }
+    });
+    
+    // Form validation
+    $('#deleteAccountForm').submit(function(e) {
+        e.preventDefault();
+        if (validateDeleteForm()) {
+            confirmFinalDeletion();
+        }
+    });
+    
+    // Real-time validation
+    $('#id_confirm_username').on('input', function() {
+        validateUsername();
+    });
+    
+    $('#id_confirm_password').on('input', function() {
+        validatePassword();
+    });
+});
+
+function validateUsername() {
+    const username = $('#id_confirm_username').val().trim();
+    const currentUsername = '{{ user.username }}';
+    
+    if (username === currentUsername) {
+        $('#id_confirm_username').removeClass('is-invalid').addClass('is-valid');
+        return true;
+    } else {
+        $('#id_confirm_username').removeClass('is-valid').addClass('is-invalid');
+        return false;
+    }
+}
+
+function validatePassword() {
+    const password = $('#id_confirm_password').val();
+    
+    if (password.length > 0) {
+        $('#id_confirm_password').removeClass('is-invalid').addClass('is-valid');
+        return true;
+    } else {
+        $('#id_confirm_password').removeClass('is-valid').addClass('is-invalid');
+        return false;
+    }
+}
+
+function validateDeleteForm() {
+    let isValid = true;
+    
+    // Validate username confirmation
+    if (!validateUsername()) {
+        showAlert('Please enter your correct username', 'error');
+        isValid = false;
+    }
+    
+    // Validate password
+    if (!validatePassword()) {
+        showAlert('Please enter your password', 'error');
+        isValid = false;
+    }
+    
+    // Check confirmation checkbox
+    if (!$('#id_confirm_deletion').is(':checked')) {
+        showAlert('Please confirm that you understand this action is permanent', 'error');
+        isValid = false;
+    }
+    
+    return isValid;
+}
+
+function confirmFinalDeletion() {
+    const username = $('#id_confirm_username').val().trim();
+    const reason = $('#id_reason').val();
+    
+    let message = `Are you absolutely sure you want to delete your account "${username}"?`;
+    
+    if (reason) {
+        message += `\n\nReason: ${reason}`;
+    }
+    
+    message += '\n\nThis action cannot be undone!';
+    
+    if (confirm(message)) {
+        // Disable submit button
+        const deleteBtn = $('#deleteBtn');
+        const originalText = deleteBtn.html();
+        deleteBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Deleting...');
+        
+        // Submit the form
+        $('#deleteAccountForm')[0].submit();
+    }
+}
+
+function contactSupport() {
+    showAlert('Support contact feature will be implemented soon.', 'info');
+}
+
+function showAlert(message, type) {
+    const alertClass = type === 'success' ? 'alert-success' : 
+                      type === 'error' ? 'alert-danger' : 
+                      type === 'warning' ? 'alert-warning' : 'alert-info';
+    
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // Remove existing alerts
+    $('.alert').remove();
+    
+    // Add new alert
+    $('.card-body').first().prepend(alertHtml);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        $('.alert').fadeOut(300, function() {
+            $(this).remove();
+        });
+    }, 5000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Write a Review - Style Ghor{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Write a Review</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Order Information -->
+                    <div class="order-info mb-4 p-3 bg-light rounded">
+                        <h6 class="mb-2">Order Information</h6>
+                        <p class="mb-1"><strong>Order #:</strong> {{ order.order_number }}</p>
+                        <p class="mb-1"><strong>Order Date:</strong> {{ order.created_at|date:"M d, Y" }}</p>
+                        <p class="mb-0"><strong>Total Amount:</strong> ৳{{ order.total_amount }}</p>
+                    </div>
+                    
+                    <!-- Review Form -->
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <!-- Product Selection -->
+                        <div class="mb-4">
+                            <label class="form-label">Select Product to Review:</label>
+                            <select name="product" class="form-select" required>
+                                <option value="">Choose a product...</option>
+                                {% for item in order.items.all %}
+                                <option value="{{ item.product.id }}">
+                                    {{ item.product.name }} {% if item.variant %}({{ item.variant.name }}: {{ item.variant.value }}){% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Rating -->
+                        <div class="mb-4">
+                            <label class="form-label">Rating:</label>
+                            <div class="rating-input">
+                                <div class="stars d-flex gap-2">
+                                    <input type="radio" name="rating" value="5" id="star5" class="d-none">
+                                    <label for="star5" class="star-label">
+                                        <i class="far fa-star fa-2x text-muted"></i>
+                                    </label>
+                                    
+                                    <input type="radio" name="rating" value="4" id="star4" class="d-none">
+                                    <label for="star4" class="star-label">
+                                        <i class="far fa-star fa-2x text-muted"></i>
+                                    </label>
+                                    
+                                    <input type="radio" name="rating" value="3" id="star3" class="d-none">
+                                    <label for="star3" class="star-label">
+                                        <i class="far fa-star fa-2x text-muted"></i>
+                                    </label>
+                                    
+                                    <input type="radio" name="rating" value="2" id="star2" class="d-none">
+                                    <label for="star2" class="star-label">
+                                        <i class="far fa-star fa-2x text-muted"></i>
+                                    </label>
+                                    
+                                    <input type="radio" name="rating" value="1" id="star1" class="d-none">
+                                    <label for="star1" class="star-label">
+                                        <i class="far fa-star fa-2x text-muted"></i>
+                                    </label>
+                                </div>
+                                <small class="text-muted">Click on a star to rate</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Review Title -->
+                        <div class="mb-4">
+                            <label for="id_title" class="form-label">Review Title:</label>
+                            <input type="text" name="title" class="form-control" id="id_title" 
+                                   placeholder="Summarize your experience in a few words" maxlength="100">
+                            <small class="text-muted">Optional but recommended</small>
+                        </div>
+                        
+                        <!-- Review Comment -->
+                        <div class="mb-4">
+                            <label for="id_comment" class="form-label">Review Comment:</label>
+                            <textarea name="comment" class="form-control" id="id_comment" rows="5" 
+                                      placeholder="Share your detailed experience with this product..." required></textarea>
+                            <small class="text-muted">Tell others about your experience</small>
+                        </div>
+                        
+                        <!-- Review Categories -->
+                        <div class="mb-4">
+                            <label class="form-label">What did you like most?</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="likes" value="quality" id="like_quality">
+                                        <label class="form-check-label" for="like_quality">
+                                            Product Quality
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="likes" value="design" id="like_design">
+                                        <label class="form-check-label" for="like_design">
+                                            Design & Style
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="likes" value="value" id="like_value">
+                                        <label class="form-check-label" for="like_value">
+                                            Value for Money
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="likes" value="delivery" id="like_delivery">
+                                        <label class="form-check-label" for="like_delivery">
+                                            Fast Delivery
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="likes" value="packaging" id="like_packaging">
+                                        <label class="form-check-label" for="like_packaging">
+                                            Good Packaging
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="likes" value="service" id="like_service">
+                                        <label class="form-check-label" for="like_service">
+                                            Customer Service
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Would Recommend -->
+                        <div class="mb-4">
+                            <label class="form-label">Would you recommend this product?</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="would_recommend" value="yes" id="recommend_yes" required>
+                                <label class="form-check-label" for="recommend_yes">
+                                    Yes, I would recommend this product
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="would_recommend" value="no" id="recommend_no" required>
+                                <label class="form-check-label" for="recommend_no">
+                                    No, I would not recommend this product
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="would_recommend" value="maybe" id="recommend_maybe" required>
+                                <label class="form-check-label" for="recommend_maybe">
+                                    Maybe, depending on the situation
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Buttons -->
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Review
+                            </button>
+                            <a href="{% url 'shop:order_detail' order.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Order
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Review Guidelines -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">Review Guidelines</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Be honest and share your genuine experience</li>
+                        <li>Focus on the product quality and your satisfaction</li>
+                        <li>Avoid personal information or inappropriate content</li>
+                        <li>Your review helps other customers make informed decisions</li>
+                        <li>Reviews are moderated and may take 24-48 hours to appear</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.star-label {
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.star-label:hover,
+.star-label:hover ~ .star-label,
+input[type="radio"]:checked ~ .star-label {
+    color: #ffc107 !important;
+}
+
+.star-label i {
+    transition: transform 0.2s ease;
+}
+
+.star-label:hover i {
+    transform: scale(1.1);
+}
+
+.rating-input .stars {
+    flex-direction: row-reverse;
+}
+
+.rating-input .stars input[type="radio"]:checked ~ .star-label i {
+    color: #ffc107 !important;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Star rating functionality
+    $('.star-label').click(function() {
+        const rating = $(this).prev('input[type="radio"]').val();
+        updateStars(rating);
+    });
+    
+    // Hover effects for stars
+    $('.star-label').hover(
+        function() {
+            const rating = $(this).prev('input[type="radio"]').val();
+            showHoverStars(rating);
+        },
+        function() {
+            const selectedRating = $('input[name="rating"]:checked').val();
+            if (selectedRating) {
+                updateStars(selectedRating);
+            } else {
+                resetStars();
+            }
+        }
+    );
+});
+
+function updateStars(rating) {
+    $('.star-label i').removeClass('fas text-warning').addClass('far text-muted');
+    
+    for (let i = 1; i <= rating; i++) {
+        $(`#star${i}`).next('.star-label').find('i')
+            .removeClass('far text-muted')
+            .addClass('fas text-warning');
+    }
+}
+
+function showHoverStars(rating) {
+    $('.star-label i').removeClass('fas text-warning').addClass('far text-muted');
+    
+    for (let i = 1; i <= rating; i++) {
+        $(`#star${i}`).next('.star-label').find('i')
+            .removeClass('far text-muted')
+            .addClass('fas text-warning');
+    }
+}
+
+function resetStars() {
+    $('.star-label i').removeClass('fas text-warning').addClass('far text-muted');
+}
+</script>
+{% endblock %}

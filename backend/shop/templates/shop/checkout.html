@@ -1,0 +1,328 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout - Style Ghor{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Checkout</h1>
+    
+    <form method="POST" action="{% url 'shop:place_order' %}" id="checkoutForm">
+        {% csrf_token %}
+        
+        <div class="row">
+            <!-- Checkout Form -->
+            <div class="col-lg-8">
+                <!-- Shipping Information -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-shipping-fast me-2"></i>Shipping Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if user_addresses %}
+                            <div class="mb-3">
+                                <label class="form-label">Select Shipping Address:</label>
+                                <div class="row">
+                                    {% for address in user_addresses %}
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card address-card">
+                                            <div class="card-body">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="shipping_address" 
+                                                           id="shipping_{{ address.id }}" value="{{ address.id }}" 
+                                                           {% if address.is_default %}checked{% endif %} required>
+                                                    <label class="form-check-label" for="shipping_{{ address.id }}">
+                                                        <strong>{{ address.recipient_name }}</strong><br>
+                                                        {{ address.address_line_1 }}<br>
+                                                        {% if address.address_line_2 %}{{ address.address_line_2 }}<br>{% endif %}
+                                                        {{ address.city }}, {{ address.state }} {{ address.zip_code }}<br>
+                                                        {{ address.country }}<br>
+                                                        <small class="text-muted">{{ address.phone_number }}</small>
+                                                        {% if address.is_default %}
+                                                            <span class="badge bg-primary ms-2">Default</span>
+                                                        {% endif %}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <a href="{% url 'users:add_address' %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-plus me-2"></i>Add New Address
+                                </a>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <p class="mb-2">You don't have any saved addresses.</p>
+                                <a href="{% url 'users:add_address' %}" class="btn btn-primary">Add Address</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Billing Information -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-credit-card me-2"></i>Billing Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="sameAsShipping" checked>
+                            <label class="form-check-label" for="sameAsShipping">
+                                Same as shipping address
+                            </label>
+                        </div>
+                        
+                        <div id="billingAddressForm" style="display: none;">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Recipient Name</label>
+                                    <input type="text" name="billing_recipient_name" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Phone Number</label>
+                                    <input type="tel" name="billing_phone" class="form-control">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Address Line 1</label>
+                                    <input type="text" name="billing_address_line_1" class="form-control">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Address Line 2 (Optional)</label>
+                                    <input type="text" name="billing_address_line_2" class="form-control">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">City</label>
+                                    <input type="text" name="billing_city" class="form-control">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">State/Province</label>
+                                    <input type="text" name="billing_state" class="form-control">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">ZIP/Postal Code</label>
+                                    <input type="text" name="billing_zip_code" class="form-control">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Country</label>
+                                    <select name="billing_country" class="form-select">
+                                        <option value="Bangladesh">Bangladesh</option>
+                                        <option value="India">India</option>
+                                        <option value="Pakistan">Pakistan</option>
+                                        <option value="Sri Lanka">Sri Lanka</option>
+                                        <option value="Nepal">Nepal</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Payment Method -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-credit-card me-2"></i>Payment Method
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="payment_method" 
+                                   id="ssl_commerz" value="ssl_commerz" checked required>
+                            <label class="form-check-label" for="ssl_commerz">
+                                <i class="fas fa-credit-card me-2"></i>Credit/Debit Card (SSL Commerz)
+                            </label>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="payment_method" 
+                                   id="cod" value="cod" required>
+                            <label class="form-check-label" for="cod">
+                                <i class="fas fa-money-bill-wave me-2"></i>Cash on Delivery
+                            </label>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <small>
+                                <i class="fas fa-info-circle me-2"></i>
+                                For card payments, you will be redirected to our secure payment gateway.
+                                Cash on delivery is available for orders within Dhaka city.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Order Notes -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-sticky-note me-2"></i>Order Notes
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <textarea name="notes" class="form-control" rows="3" 
+                                  placeholder="Any special instructions for delivery or other notes..."></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Summary -->
+            <div class="col-lg-4">
+                <div class="card sticky-top" style="top: 100px;">
+                    <div class="card-header">
+                        <h5 class="mb-0">Order Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Cart Items -->
+                        <div class="cart-items mb-3">
+                            {% for item in cart_items %}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div>
+                                    <span class="fw-bold">{{ item.product.name }}</span>
+                                    {% if item.variant %}
+                                        <br><small class="text-muted">{{ item.variant.name }}: {{ item.variant.value }}</small>
+                                    {% endif %}
+                                    <br><small class="text-muted">Qty: {{ item.quantity }}</small>
+                                </div>
+                                <span class="fw-bold">৳{{ item.total_price }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <hr>
+                        
+                        <!-- Totals -->
+                        <div class="totals">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal:</span>
+                                <span>৳{{ subtotal }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Shipping:</span>
+                                <span>৳{{ shipping_cost }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Tax (5%):</span>
+                                <span>৳{{ tax_amount }}</span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between mb-3">
+                                <strong>Total:</strong>
+                                <strong class="text-primary h5">৳{{ total_amount }}</strong>
+                            </div>
+                        </div>
+                        
+                        <!-- Place Order Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" id="placeOrderBtn">
+                                <i class="fas fa-lock me-2"></i>Place Order
+                            </button>
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-shield-alt me-1"></i>
+                                Your payment information is secure and encrypted.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Handle billing address toggle
+    $('#sameAsShipping').change(function() {
+        if (this.checked) {
+            $('#billingAddressForm').hide();
+        } else {
+            $('#billingAddressForm').show();
+        }
+    });
+    
+    // Form validation
+    $('#checkoutForm').submit(function(e) {
+        if (!validateForm()) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Disable submit button to prevent double submission
+        $('#placeOrderBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Processing...');
+    });
+});
+
+function validateForm() {
+    let isValid = true;
+    
+    // Check if shipping address is selected
+    if (!$('input[name="shipping_address"]:checked').length) {
+        showAlert('Please select a shipping address', 'error');
+        isValid = false;
+    }
+    
+    // Check if payment method is selected
+    if (!$('input[name="payment_method"]:checked').length) {
+        showAlert('Please select a payment method', 'error');
+        isValid = false;
+    }
+    
+    // Validate billing address if different from shipping
+    if (!$('#sameAsShipping').is(':checked')) {
+        const requiredFields = [
+            'billing_recipient_name',
+            'billing_phone',
+            'billing_address_line_1',
+            'billing_city',
+            'billing_state',
+            'billing_zip_code',
+            'billing_country'
+        ];
+        
+        requiredFields.forEach(field => {
+            const value = $(`[name="${field}"]`).val().trim();
+            if (!value) {
+                showAlert(`Please fill in the ${field.replace('billing_', '').replace('_', ' ')} field`, 'error');
+                isValid = false;
+            }
+        });
+    }
+    
+    return isValid;
+}
+
+function showAlert(message, type) {
+    const alertClass = type === 'success' ? 'alert-success' : 
+                      type === 'error' ? 'alert-danger' : 
+                      type === 'warning' ? 'alert-warning' : 'alert-info';
+    
+    const alertHtml = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    $('.container').first().prepend(alertHtml);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(function() {
+        $('.alert').fadeOut();
+    }, 5000);
+}
+</script>
+{% endblock %}
